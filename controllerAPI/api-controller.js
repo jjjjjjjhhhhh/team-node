@@ -168,6 +168,51 @@ async function getDataInfo(req, res) {
         console.log(e)
     }
 }
+// get donation data
+async function getDonationData(req, res) {
+    try{
+        const connect = await connectData();
+        const FUNDRAISER_ID = req.query.FUNDRAISER_ID
+        if (FUNDRAISER_ID) {
+            const [rows, fields] = await connect.execute('SELECT * FROM donation WHERE FUNDRAISER_ID =?',[FUNDRAISER_ID])
+            console.log(rows)
+            res.send({
+                code: 200,
+                data: rows
+            })
+        } else {
+            res.send({
+                code: 400,
+                msg: 'Missing FUNDRAISER_ID'
+            })
+        }
+    } catch (e) {
+        console.log(e)
+        res.send({
+            code: 500,
+            msg: e
+        })
+    }
+}
+// add donation data
+async function addDonationData(req,res) {
+    try{
+        const connect = await connectData();
+        const {DATE, AMOUNT, GIVER, FUNDRAISER_ID} = req.body
+        const [rows, fields] = await connect.execute('INSERT INTO donation (DATE, AMOUNT, GIVER, FUNDRAISER_ID) VALUES (?,?,?,?)',[DATE, AMOUNT, GIVER, FUNDRAISER_ID])
+        res.send({
+            code: 200,
+            data:'success'
+        })
+    } catch(e) {
+        res.send({
+            code: 500,
+            data: 'missing parameter'
+        })
+    }
+}
+
+
 
 
 
@@ -180,5 +225,9 @@ router.get('/allTypeData', getAllTypeData);
 router.get('/getProgress', getProgress);
 router.get('/getTypeData', getTypeData);
 router.get('/getDataInfo', getDataInfo);
+
+
+router.get('/getDonationData', getDonationData);
+router.post('/addDonationData', addDonationData);
 
 module.exports = router;
