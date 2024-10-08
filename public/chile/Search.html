@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body{
+        margin: 0 0;
+        padding: 0 0;
+    }
+    .top{
+        height: 80px;
+        background-image: url('./image/top.jpg');
+        background-size: 100% auto;
+        position: relative;
+    }
+    .logo{
+        height: 50px;
+        position: absolute;
+        left: 50px;
+        top: 15px;
+    }
+    .content{
+        /* width: 300px; */
+        height: 300px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .content-wrapper{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+    }
+    .left {
+        /* flex: 1; */
+    }
+    .main {
+        /* flex: 1; */
+        width: 700px;
+        padding-left: 20px;
+        line-height: 50px;
+    }
+    .left-image{
+        height: 220px;
+        width: 400px;
+    }
+    .main-title{
+        font-size: 22px;
+    }
+    .main-value{
+        color: red;
+    }
+    .main-content{
+        line-height: 30px;
+        font-size: 16px;
+        color: #666;
+    }
+    .main-amount{
+        display: flex;
+    }
+    .main-amount-flex{
+        flex: 1;
+    }
+    .Search{
+        float: right;
+        padding-top: 20px;
+        padding-right: 50px;
+    }
+    form{
+        display: flex;
+        flex-direction: column;
+    }
+    form label, form input {
+    margin-bottom: 10px; /* Space between elements */
+  }
+  .content-form{
+    width: 300px;
+  }
+  .content-value{
+    height: 500px;
+        /* display: flex;
+        justify-content: center;
+        align-items: center; */
+  }
+</style>
+<body>
+    <div>
+        <div class="top">
+            <img class="logo" src="./image/logo.png" alt="">
+        </div>
+        <div class="content">
+            <div class="content-form">
+                <form onsubmit="handleSearch(this)">
+                    <label for="name">title：<input type="search" name="name" placeholder="输入名称..."></label>
+                    <label for="city">city：<input type="search" name="city" placeholder="输入城市名称..."></label>
+                    <label for="status">status：
+                    
+                    <input type="radio" name="gender" value="1">progress
+                    <input type="radio" name="gender" value="2">Ended</label>
+    
+                    <input type="submit" value="Search">
+                    <input type="reset" value="Clear">
+                </form>
+            </div>
+        </div>
+        <div class="content-value">
+            
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    let url = 'http://127.0.0.1:3000'
+
+
+    function handleSearch(form) {
+        event.preventDefault();        
+        let name = form.name.value;
+        let city = form.city.value;
+
+        const selectedRadio = document.querySelector('input[name="gender"]:checked')
+    
+        if (name === null && city === null && selectedRadio === null) {
+            return alert('Select at least one condition!!!')
+        }
+        let params = {
+            type: selectedRadio ? selectedRadio.value : '',
+            CAPTION: name ? name : '',
+            CITY: city ? city : ''
+        }
+        getSearch(params)
+    }
+
+    function getSearch(params) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET',url + `/getTypeData?type=${params.type}&CAPTION=${params.CAPTION}&CITY=${params.CITY}`, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                let data = JSON.parse(xhr.responseText);
+                console.log(data)
+                addContentData(data.data)
+            } else {
+                console.error('请求失败');
+            }
+        };
+}
+function changeWraaper(id){
+        window.location.href = `./Detail.html?id=${id}`
+}
+
+function addContentData(data) {
+    let content = document.querySelector('.content-value');
+    let str = ''
+    if (data.length === 0) {
+        str = '<div style="color: red">notFind Fundraising Activities</div>'
+        content.innerHTML = str
+    } else{
+        data.forEach(item => {
+            str += `<div class="content-wrapper" >
+                <div class="left" onclick=changeWraaper(${item.FUNDRAISER_ID})>
+                    <img class="left-image" src="${item.IMG}" alt="">
+                </div>
+                <div class="main">
+                    <div class="main-title" onclick=changeWraaper(${item.FUNDRAISER_ID})>${item.CAPTION}</div>
+                    <div class="main-amount">
+                        <div class="main-amount-flex">
+                            TARGET_FUNDING：<span class="main-value">￥${item.TARGET_FUNDING}元</span>
+                        </div>
+                        <div class="main-amount-flex">
+                             CURRENT_FUNDING：<span class="main-value"> ￥${item.CURRENT_FUNDING}元  </span>  
+                        </div>
+                    </div>
+                    <div>
+${item.ACTIVE_CATEGORY_ID == 1? 'progress' : item.ACTIVE_CATEGORY_ID == 2? 'Ended' : item.ACTIVE_CATEGORY_ID == 3? 'Removed' : 'NotStarted'}
+
+                    </div>
+                    <div class="main-content">
+                    ${item.VALUE}
+                    </div>
+                </div>
+            </div>`
+        })
+        content.innerHTML = str
+    }
+}
+</script>
+
+
+</html>

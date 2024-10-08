@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    body{
+        margin: 0 0;
+        padding: 0 0;
+    }
+    .top{
+        height: 80px;
+        background-image: url('./image/top.jpg');
+        background-size: 100% auto;
+        position: relative;
+    }
+    .logo{
+        height: 50px;
+        position: absolute;
+        left: 50px;
+        top: 15px;
+    }
+    .content{
+        
+        height: 500px;
+    }
+    .content-wrapper{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+    }
+    .left {
+        /* flex: 1; */
+    }
+    .main {
+        /* flex: 1; */
+        height: 220px;
+        width: 700px;
+        padding-left: 20px;
+        line-height: 35px;
+    }
+    .left-image{
+        height: 220px;
+        width: 400px;
+    }
+    .main-title{
+        font-size: 22px;
+    }
+    .main-value{
+        color: red;
+    }
+    .main-content{
+        line-height: 20px;
+        font-size: 12px;
+        color: #666;
+    }
+    .main-amount{
+        display: flex;
+    }
+    .main-amount-flex{
+        flex: 1;
+    }
+    #Search{
+        float: right;
+        padding-top: 20px;
+        padding-right: 50px;
+    }
+</style>
+
+
+
+<body>
+    <div>
+        <div class="top">
+            <img class="logo" src="./image/logo.png" alt="">
+            <div id="Search" >
+                search
+            </div>
+        </div>
+        <div class="content">
+  
+        </div>
+    </div>
+</body>
+
+<script type="text/javascript">
+    let url = 'http://127.0.0.1:3000'
+    
+    console.log('123',url);
+
+    let search = document.getElementById('Search')
+    search.onclick = function(){
+       window.location.href = './Search.html'
+    }
+    function changeWraaper(id){
+        window.location.href = `./Detail.html?id=${id}`
+    }
+
+
+
+    function getList() {
+        console.log('123');
+        
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET',url + '/getProgress', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send();
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                let data = JSON.parse(xhr.responseText);
+                console.log(data)
+                addContentData(data.data)
+            } else {
+                console.error('请求失败');
+            }
+        };
+    }
+
+    function addContentData(data) {
+        let content = document.querySelector('.content');
+        let str = ''
+        data.forEach(item => {
+            str += `<div class="content-wrapper" >
+                <div class="left" onclick=changeWraaper(${item.FUNDRAISER_ID})>
+                    <img class="left-image" src="${item.IMG}" alt="">
+                </div>
+                <div class="main">
+                    <div class="main-title" onclick=changeWraaper(${item.FUNDRAISER_ID})>${item.CAPTION}</div>
+                    <div class="main-amount">
+                        <div class="main-amount-flex">
+                            TARGET_FUNDING：<span class="main-value">￥${item.TARGET_FUNDING}元</span>
+                        </div>
+                        <div class="main-amount-flex">
+                            CURRENT_FUNDING：<span class="main-value"> ￥${item.CURRENT_FUNDING}元  </span>  
+                        </div>
+                    </div>
+                    <div>
+                        ${item.ACTIVE_CATEGORY_ID == 1? 'progress' : item.ACTIVE_CATEGORY_ID == 2? 'Ended' : item.ACTIVE_CATEGORY_ID == 3? 'Removed' : 'NotStarted'}
+
+                    </div>
+                    <div class="main-content">
+                    ${item.VALUE}
+                    </div>
+                </div>
+            </div>`
+        })
+        content.innerHTML = str
+    }
+    
+
+    getList()
+
+
+
+
+</script>
+
+
+</html>
