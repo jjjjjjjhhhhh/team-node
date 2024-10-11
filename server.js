@@ -12,5 +12,5 @@ app.use('/',api)
 
 
 app.listen(port,() => {
-    console.log('http://127.0.0.1:3000/chile/index.html')
+    console.log('http://127.0.0.1:3000')
 })

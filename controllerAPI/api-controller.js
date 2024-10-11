@@ -117,7 +117,7 @@ async function getTypeData(req, res) {
         const connect = await connectData();
         let conditions = [];
         let params = [];
-        const {type, CAPTION, CITY } = req.query
+        const {type, CAPTION, CITY,ORGANIZER,CURRENT_FUNDING,VALUE} = req.query
         if (type !== null && type !== undefined && type !== '') {
             conditions.push('ACTIVE_CATEGORY_ID = ?');
             params.push(type);
@@ -129,6 +129,18 @@ async function getTypeData(req, res) {
         if (CITY !== null && CITY !== undefined && CITY !== '') {
             conditions.push('CITY = ?');
             params.push(CITY);
+        }
+        if (ORGANIZER !== null && ORGANIZER !== undefined && ORGANIZER !== '') {
+            conditions.push('ORGANIZER = ?');
+            params.push(ORGANIZER);
+        }
+        if (CURRENT_FUNDING !== null && CURRENT_FUNDING !== undefined && CURRENT_FUNDING !== '') {
+            conditions.push('CURRENT_FUNDING = ?');
+            params.push(CURRENT_FUNDING);
+        }
+        if (VALUE !== null && VALUE !== undefined && VALUE !== '') {
+            conditions.push('VALUE = ?');
+            params.push(VALUE);
         }
         let whereClause = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
@@ -196,15 +208,22 @@ async function getDonationData(req, res) {
 }
 // add donation data
 async function addDonationData(req,res) {
+    const {DATE, AMOUNT, GIVER, FUNDRAISER_ID} = req.body
+    const connect = await connectData();
+    await connect.beginTransaction();  
     try{
-        const connect = await connectData();
-        const {DATE, AMOUNT, GIVER, FUNDRAISER_ID} = req.body
+
+        const [rows1,fields1] = await connect.execute('UPDATE fundraiser SET CURRENT_FUNDING = CURRENT_FUNDING +? WHERE FUNDRAISER_ID =?',[AMOUNT, FUNDRAISER_ID])
         const [rows, fields] = await connect.execute('INSERT INTO donation (DATE, AMOUNT, GIVER, FUNDRAISER_ID) VALUES (?,?,?,?)',[DATE, AMOUNT, GIVER, FUNDRAISER_ID])
+        // 提交事务  
+        await connect.commit();  
+  
         res.send({
             code: 200,
             data:'success'
         })
     } catch(e) {
+        await connect.rollback();  
         res.send({
             code: 500,
             data: 'missing parameter'
