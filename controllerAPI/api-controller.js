@@ -65,7 +65,7 @@ async function deleteFundraiserData(req, res) {
         const FUNDRAISER_ID = req.query.FUNDRAISER_ID
         const ACTIVE_CATEGORY_ID = req.query.ACTIVE_CATEGORY_ID
         console.log(FUNDRAISER_ID)
-        if (ACTIVE_CATEGORY_ID === 0) {
+        if (ACTIVE_CATEGORY_ID == 0) {
             const [rows, fields] = await connect.execute('DELETE FROM fundraiser WHERE FUNDRAISER_ID =?',[FUNDRAISER_ID])
             res.send({
                 code: 200,
@@ -174,7 +174,7 @@ async function getDonationData(req, res) {
         const connect = await connectData();
         const FUNDRAISER_ID = req.query.FUNDRAISER_ID
         if (FUNDRAISER_ID) {
-            const [rows, fields] = await connect.execute('SELECT * FROM donation WHERE FUNDRAISER_ID =?',[FUNDRAISER_ID])
+            const [rows, fields] = await connect.execute('SELECT * FROM donation WHERE FUNDRAISER_ID =? ORDER BY DATE DESC',[FUNDRAISER_ID])
             console.log(rows)
             res.send({
                 code: 200,
