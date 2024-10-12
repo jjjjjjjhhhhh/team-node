@@ -22,8 +22,8 @@ async function addFundraiserData(req, res) {
     try{
         const connect = await connectData();
         console.log(req.body)
-        const {VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID} = req.body
-        const [rows, fields] = await connect.execute('INSERT INTO fundraiser (VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID) VALUES (?,?,?,?,?,?,?)',[VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID])
+        const {VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID,Active} = req.body
+        const [rows, fields] = await connect.execute('INSERT INTO fundraiser (VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID,Active) VALUES (?,?,?,?,?,?,?,?)',[VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID,Active])
         res.send({
             code: 200,
             data: 'success'
@@ -39,12 +39,14 @@ async function addFundraiserData(req, res) {
 // update fundraiser data
 async function updateFundraiserData(req, res) {
     try{
+        console.log(req.body,'----')
+
         const connect = await connectData();
-        const {VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID} = req.body
+        const {VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID,Active} = req.body
         const FUNDRAISER_ID = req.body.FUNDRAISER_ID
         console.log(VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID)
-        const [rows, fields] = await connect.execute('UPDATE fundraiser SET VALUE =?, ORGANIZER =?, CAPTION =?, TARGET_FUNDING =?, CURRENT_FUNDING =?, CITY =?, ACTIVE_CATEGORY_ID =? WHERE FUNDRAISER_ID =?',
-            [VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID,FUNDRAISER_ID])
+        const [rows, fields] = await connect.execute('UPDATE fundraiser SET VALUE =?, ORGANIZER =?, CAPTION =?, TARGET_FUNDING =?, CURRENT_FUNDING =?, CITY =?, ACTIVE_CATEGORY_ID =?,Active=? WHERE FUNDRAISER_ID =?',
+            [VALUE, ORGANIZER, CAPTION, TARGET_FUNDING, CURRENT_FUNDING, CITY, ACTIVE_CATEGORY_ID,Active,FUNDRAISER_ID])
         res.send({
                 code: 200,
                 data: 'success'
@@ -102,7 +104,7 @@ async function getAllTypeData(req, res) {
 async function getProgress(req, res) {
     try{
         const connect = await connectData();
-        const [rows, fields] = await connect.execute('SELECT * FROM fundraiser WHERE ACTIVE_CATEGORY_ID = 1')
+        const [rows, fields] = await connect.execute('SELECT * FROM fundraiser WHERE Active = 0')
         console.log(rows)
         res.send({
             code: 200,
@@ -117,9 +119,13 @@ async function getTypeData(req, res) {
         const connect = await connectData();
         let conditions = [];
         let params = [];
-        const {type, CAPTION, CITY,ORGANIZER,CURRENT_FUNDING,VALUE} = req.query
-        if (type !== null && type !== undefined && type !== '') {
+        const {type, CAPTION, CITY,ORGANIZER,CURRENT_FUNDING,VALUE,ACTIVE_CATEGORY_ID} = req.query
+        if (ACTIVE_CATEGORY_ID !== null && ACTIVE_CATEGORY_ID !== undefined && ACTIVE_CATEGORY_ID !== '') {
             conditions.push('ACTIVE_CATEGORY_ID = ?');
+            params.push(type);
+        }
+        if (type !== null && type !== undefined && type !== '') {
+            conditions.push('Active = ?');
             params.push(type);
         }
         if (CAPTION !== null && CAPTION !== undefined && CAPTION !== '') {
